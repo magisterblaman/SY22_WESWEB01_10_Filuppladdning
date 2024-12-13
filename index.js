@@ -1,7 +1,9 @@
 import 'dotenv/config';
 import http from 'http';
 import { handleStaticFileRequest } from './static-file-handler.js';
-
+import { getRequestFile } from './utilities.js';
+import fs from 'fs/promises';
+import crypto from 'crypto';
 
 /**
  * 
@@ -30,7 +32,31 @@ async function handleRequest(request, response) {
 		if (request.method === 'POST') {
 			// ta emot en bild
 
+			let body = await getRequestFile(request);
 
+			let ext;
+			if (body.contentType === 'image/png') {
+				ext = 'png';
+			} else if (body.contentType === 'image/jpeg') {
+				ext = 'jpg';
+			} else if (body.contentType === 'image/svg+xml') {
+				ext = 'svg';
+			} else if (body.contentType === 'image/webp') {
+				ext = 'webp';
+			} else {
+				response.writeHead(400, { 'Content-Type': 'text/plain' });
+				response.write('400 Bad Request');
+				response.end();
+				return;
+			}
+
+			let fileName = crypto.randomUUID().toString() + '.' + ext;
+
+			await fs.writeFile('public/uploads/' + fileName, body.content);
+
+			response.writeHead(201, { 'Content-Type': 'text/plain' });
+			response.write('201 Created');
+			response.end();
 			return;
 		}
 
