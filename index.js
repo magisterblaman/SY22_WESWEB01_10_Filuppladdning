@@ -54,8 +54,7 @@ async function handleRequest(request, response) {
 
 			await fs.writeFile('public/uploads/' + fileName, body.content);
 
-			response.writeHead(201, { 'Content-Type': 'text/plain' });
-			response.write('201 Created');
+			response.writeHead(303, { 'Location': '/static/uploads/' + fileName });
 			response.end();
 			return;
 		}
